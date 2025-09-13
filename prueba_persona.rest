@@ -1,7 +1,18 @@
-POST http://localhost:3001/api/notes
+GET http://localhost:3001/api/persons
+###
+GET http://localhost:3001/api/persons/1
+###
+GET http://localhost:3001/api/persons/5
+###
+DELETE http://localhost:3001/api/persons/4
+###
+POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-    "content": "Hola Mundo",
-    "important": true
+    "name": "Juje",
+    "number": "3534694201"
 }
+###
+# PUT http://localhost:3001/api/persons/1
+# Content-Type: application/json
