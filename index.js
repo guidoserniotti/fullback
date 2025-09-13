@@ -2,6 +2,8 @@ const date = new Date();
 const express = require("express");
 const app = express();
 app.use(express.json());
+var morgan = require("morgan");
+app.use(morgan("tiny"));
 
 let persons = [
     {
@@ -25,6 +27,15 @@ let persons = [
         number: "39-23-6423122",
     },
 ];
+
+// const requestLogger = (request, response, next) => {
+//     console.log("Method:", request.method);
+//     console.log("Path:  ", request.path);
+//     console.log("Body:  ", request.body);
+//     console.log("---");
+//     next();
+// };
+// app.use(requestLogger);
 
 app.get("/", (req, res) => {
     res.send("<h1>OK</h1>");
@@ -56,7 +67,7 @@ app.get("/api/persons/:id", (req, res) => {
 
 app.delete("/api/persons/:id", (req, res) => {
     const id = Number(req.params.id);
-    console.log(persons.find((person) => person.id === id));
+    // console.log(persons.find((person) => person.id === id));
     persons = persons.filter((person) => person.id !== id);
     res.status(204).end();
 });
@@ -81,6 +92,12 @@ app.post("/api/persons", (req, res) => {
     persons = persons.concat(person);
     res.json(person);
 });
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
 
 const PORT = 3001;
 app.listen(PORT, () => {
