@@ -7,6 +7,8 @@ app = 'fullback'
 primary_region = 'gru'
 
 [build]
+[env]
+  PORT = "3000"
 
 [http_service]
   internal_port = 3000
