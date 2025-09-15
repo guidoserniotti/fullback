@@ -86,7 +86,6 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (req, res) => {
     const body = req.body;
-    console.log("antes", req.body);
     if (!body.name || !body.number) {
         return res.status(400).json({
             error: "person data missing",
@@ -104,7 +103,7 @@ app.post("/api/persons", (req, res) => {
     };
     persons = persons.concat(person);
     res.json(person);
-    console.log("despues", req.body);
+    // console.log("resultado post", req.body);
 });
 
 const unknownEndpoint = (request, response) => {
