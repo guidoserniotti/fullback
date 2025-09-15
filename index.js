@@ -103,7 +103,7 @@ app.post("/api/persons", (req, res) => {
     };
     persons = persons.concat(person);
     res.json(person);
-    // console.log("resultado post", req.body);
+    console.log("resultado post", req.body);
 });
 
 const unknownEndpoint = (request, response) => {
