@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 app.use(cors());
 app.use(express.json());
+app.use(express.static("dist")); /* ESTO HACE LA CONEXIÓN */
 var morgan = require("morgan");
 
 morgan.token("content", function getContent(req) {
@@ -46,7 +47,7 @@ let persons = [
 //     console.log("---");
 //     next();
 // };
-// app.use(requestLogger);
+// app.use(requestLogger);            --> REEMPLAZADO POR MORGAN
 
 app.get("/", (req, res) => {
     res.send("<h1>OK</h1>");
@@ -85,6 +86,7 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (req, res) => {
     const body = req.body;
+    console.log("antes", req.body);
     if (!body.name || !body.number) {
         return res.status(400).json({
             error: "person data missing",
@@ -102,6 +104,7 @@ app.post("/api/persons", (req, res) => {
     };
     persons = persons.concat(person);
     res.json(person);
+    console.log("despues", req.body);
 });
 
 const unknownEndpoint = (request, response) => {
