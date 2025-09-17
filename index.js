@@ -1,6 +1,8 @@
+require("dotenv").config();
 const date = new Date();
 const express = require("express");
 const app = express();
+const Person = require("./models/persons");
 const cors = require("cors");
 app.use(cors());
 app.use(express.json());
@@ -16,29 +18,6 @@ app.use(
         ":method :url :status :res[content-length] - :response-time ms :content"
     )
 );
-
-let persons = [
-    {
-        id: 1,
-        name: "Arto Hellas",
-        number: "040-123456",
-    },
-    {
-        id: 2,
-        name: "Ada Lovelace",
-        number: "39-44-5323523",
-    },
-    {
-        id: 3,
-        name: "Dan Abramov",
-        number: "12-43-234345",
-    },
-    {
-        id: 4,
-        name: "Mary Poppendieck",
-        number: "39-23-6423122",
-    },
-];
 
 // const requestLogger = (request, response, next) => {
 //     console.log("Method:", request.method);
@@ -63,23 +42,25 @@ app.get("/info", (req, res) => {
 });
 
 app.get("/api/persons", (req, res) => {
-    res.json(persons);
+    Person.find({}).then((persons) => {
+        res.json(persons);
+    });
 });
 
 app.get("/api/persons/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const person = persons.find((person) => person.id === id);
-    if (person) {
-        res.json(person);
-    } else {
-        res.statusMessage = "La persona solicitada no existe";
-        res.status(404).end();
-    }
+    const id = req.params.id;
+    Person.findById(id).then((person) => {
+        if (person) {
+            res.json(person);
+        } else {
+            res.statusMessage = "La persona solicitada no existe";
+            res.status(404).end();
+        }
+    });
 });
 
 app.delete("/api/persons/:id", (req, res) => {
     const id = Number(req.params.id);
-    // console.log(persons.find((person) => person.id === id));
     persons = persons.filter((person) => person.id !== id);
     res.status(204).end();
 });
@@ -112,7 +93,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
