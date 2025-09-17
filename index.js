@@ -47,16 +47,18 @@ app.get("/api/persons", (req, res) => {
     });
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
     const id = req.params.id;
-    Person.findById(id).then((person) => {
-        if (person) {
-            res.json(person);
-        } else {
-            res.statusMessage = "La persona solicitada no existe";
-            res.status(404).end();
-        }
-    });
+    Person.findById(id)
+        .then((person) => {
+            if (person) {
+                res.json(person);
+            } else {
+                res.statusMessage = "La persona solicitada no existe";
+                res.status(404).end();
+            }
+        })
+        .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (req, res) => {
@@ -72,26 +74,42 @@ app.post("/api/persons", (req, res) => {
             error: "person data missing",
         });
     }
-    if (persons.some((person) => person.name === body.name)) {
-        return res.status(400).json({
-            error: "this name already exists",
-        });
-    }
-    const person = {
-        id: Math.floor(Math.random() * 1000),
+    // if (persons.some((person) => person.name === body.name)) {
+    //     return res.status(400).json({
+    //         error: "this name already exists",
+    //     });
+    // }
+    const person = new Person({
         name: body.name,
         number: body.number,
-    };
-    persons = persons.concat(person);
-    res.json(person);
-    console.log("resultado post", req.body);
+    });
+    person.save().then((result) => {
+        console.log(
+            "added",
+            result.name,
+            "number",
+            result.number,
+            "to phonebook"
+        );
+    });
+    res.json(person); // --> esta respuesta sirve para la renderización, NO BORRAR
 });
-
-const unknownEndpoint = (request, response) => {
-    response.status(404).send({ error: "unknown endpoint" });
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: "unknown endpoint" });
 };
 
 app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+    console.error(error.message);
+
+    if (error.name === "CastError") {
+        return res.status(400).send({ error: "malformatted id" });
+    }
+
+    next(error);
+};
+app.use(errorHandler); // este debe ser el último middleware cargado, ¡también todas las rutas deben ser registrada antes que esto!
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
