@@ -32,13 +32,17 @@ app.get("/", (req, res) => {
     res.send("<h1>OK</h1>");
 });
 
-app.get("/info", (req, res) => {
-    res.send(`
-        <p>
-            Phonebook has info for ${persons.length} people.
-        <br>
-            ${date}
-        </p>`);
+app.get("/info", (req, res, next) => {
+    Person.find({})
+        .then((persons) => {
+            res.send(`
+                <p>
+                    Phonebook has info for ${persons.length} people.
+                <br>
+                    ${date}
+                </p>`);
+        })
+        .catch((error) => next(error));
 });
 
 app.get("/api/persons", (req, res) => {
