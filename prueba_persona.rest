@@ -2,7 +2,10 @@ GET http://localhost:3001/api/persons
 ###
 GET http://localhost:3001/api/persons/68cab5579c44f64ed16066e4
 ###
-DELETE http://localhost:3001/api/persons/68cab6b544232fa6ef0e31a8
+# DELETE REQ WITH EXISTING AND VALID ID
+DELETE http://localhost:3001/api/persons/68cab5579c44f64ed16066e4
+# DELETE REQ WITH NON EXISTING BUT VALID ID
+DELETE http://localhost:3001/api/persons/68cab5579c44f64ed16066e3
 ###
 POST http://localhost:3001/api/persons
 Content-Type: application/json
