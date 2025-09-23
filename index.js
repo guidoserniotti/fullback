@@ -59,7 +59,7 @@ app.get("/api/persons/:id", (req, res, next) => {
                 res.json(person);
             } else {
                 res.statusMessage = "La persona solicitada no existe";
-                res.status(404).end();
+                res.status(404);
             }
         })
         .catch((error) => next(error));
@@ -69,13 +69,12 @@ app.delete("/api/persons/:id", (req, res, next) => {
     const id = req.params.id;
     Person.findByIdAndDelete(id)
         .then((result) => {
-            res.json(result);
-            res.status(204).end();
+            res.json(result).status(204);
         })
         .catch((error) => next(error));
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
     const body = req.body;
     if (!body.name || !body.number) {
         return res.status(400).json({
@@ -86,16 +85,19 @@ app.post("/api/persons", (req, res) => {
         name: body.name,
         number: body.number,
     });
-    person.save().then((result) => {
-        console.log(
-            "added",
-            result.name,
-            "number",
-            result.number,
-            "to phonebook"
-        );
-    });
-    res.json(person); // --> esta respuesta sirve para la renderización, NO BORRAR
+    person
+        .save({ runValidators: true })
+        .then((result) => {
+            console.log(
+                "added",
+                result.name,
+                "number",
+                result.number,
+                "to phonebook"
+            );
+            res.json(result);
+        })
+        .catch((error) => next(error));
 });
 
 app.put("/api/persons/:id", (req, res, next) => {
@@ -125,7 +127,9 @@ const errorHandler = (error, req, res, next) => {
     if (error.name === "CastError") {
         return res.status(400).send({ error: "malformatted id" });
     }
-
+    if (error.name === "ValidationError") {
+        return res.status(400).json({ error: error.message });
+    }
     next(error);
 };
 app.use(errorHandler); // este debe ser el último middleware cargado, ¡también todas las rutas deben ser registrada antes que esto!
