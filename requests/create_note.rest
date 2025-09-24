@@ -1,0 +1,32 @@
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Cómo usar HTTP en tus proyectos",
+  "author": "Guido",
+  "url": "https://mi-blog.com/como-usar-http",
+  "likes": 10
+}
+###
+
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Introducción a REST",
+  "author": "Ana",
+  "url": "https://mi-blog.com/introduccion-rest",
+  "likes": 5
+}
+
+###
+
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Mejores prácticas en APIs",
+  "author": "Luis",
+  "url": "https://mi-blog.com/mejores-practicas-apis",
+  "likes": 20
+}
