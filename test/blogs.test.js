@@ -7,7 +7,7 @@ const blogs = [
         title: "React patterns",
         author: "Michael Chan",
         url: "https://reactpatterns.com/",
-        likes: 10,
+        likes: 30,
         __v: 0,
     },
     {
@@ -15,7 +15,7 @@ const blogs = [
         title: "Go To Statement Considered Harmful",
         author: "Edsger W. Dijkstra",
         url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-        likes: 10,
+        likes: 20,
         __v: 0,
     },
     {
@@ -23,7 +23,7 @@ const blogs = [
         title: "Canonical string reduction",
         author: "Edsger W. Dijkstra",
         url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 10,
+        likes: 12,
         __v: 0,
     },
     {
@@ -47,7 +47,7 @@ const blogs = [
         title: "Type wars",
         author: "Robert C. Martin",
         url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-        likes: 11,
+        likes: 9,
         __v: 0,
     },
 ];
@@ -81,16 +81,16 @@ describe("total likes", () => {
 
     test("of a bigger list is calculated right", () => {
         const result = listHelper.totalLikes(blogs);
-        assert.strictEqual(result, 61);
+        assert.strictEqual(result, 91);
     });
 });
 
 describe("blog", () => {
     test("with most likes", () => {
         const mostLikedBlog = {
-            author: "Robert C. Martin",
-            likes: 11,
-            title: "Type wars",
+            author: "Michael Chan",
+            likes: 30,
+            title: "React patterns",
         };
         const result = listHelper.favoriteBlog(blogs);
         assert.deepStrictEqual(result, mostLikedBlog);
@@ -103,6 +103,14 @@ describe("author", () => {
         assert.deepStrictEqual(result, {
             author: "Robert C. Martin",
             blogs: 3,
+        });
+    });
+
+    test("with most likes", () => {
+        const result = listHelper.mostLikes(blogs);
+        assert.deepStrictEqual(result, {
+            author: "Edsger W. Dijkstra",
+            likes: 32,
         });
     });
 });
