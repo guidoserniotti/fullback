@@ -1,105 +1,68 @@
-const { test, describe } = require("node:test");
+const { test, describe, beforeEach, after } = require("node:test");
+const supertest = require("supertest");
 const assert = require("node:assert");
+const mongoose = require("mongoose");
 const listHelper = require("../utils/list_helper");
-const blogs = [
-    {
-        _id: "5a422a851b54a676234d17f7",
-        title: "React patterns",
-        author: "Michael Chan",
-        url: "https://reactpatterns.com/",
-        likes: 30,
-        __v: 0,
-    },
-    {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-        likes: 20,
-        __v: 0,
-    },
-    {
-        _id: "5a422b3a1b54a676234d17f9",
-        title: "Canonical string reduction",
-        author: "Edsger W. Dijkstra",
-        url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-        likes: 12,
-        __v: 0,
-    },
-    {
-        _id: "5a422b891b54a676234d17fa",
-        title: "First class tests",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-        likes: 10,
-        __v: 0,
-    },
-    {
-        _id: "5a422ba71b54a676234d17fb",
-        title: "TDD harms architecture",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-        likes: 10,
-        __v: 0,
-    },
-    {
-        _id: "5a422bc61b54a676234d17fc",
-        title: "Type wars",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-        likes: 9,
-        __v: 0,
-    },
-];
-const emptyBlogs = [];
-const listWithOneBlog = [
-    {
-        _id: "5a422aa71b54a676234d17f8",
-        title: "Go To Statement Considered Harmful",
-        author: "Edsger W. Dijkstra",
-        url: "https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf",
-        likes: 5,
-        __v: 0,
-    },
-];
+const app = require("../app");
+const api = supertest(app);
+const { info, error } = require("../utils/logger");
+
+const Blog = require("../models/blog");
+
+beforeEach(async () => {
+    await Blog.deleteMany({});
+
+    for (let blog of listHelper.blogs) {
+        let blogObject = new Blog(blog);
+        await blogObject.save();
+    }
+});
 
 test("dummy returns one", () => {
-    const result = listHelper.dummy(emptyBlogs);
+    const result = listHelper.dummy(listHelper.emptyBlogs);
     assert.strictEqual(result, 1);
 });
 
 describe("total likes", () => {
     test("when list has only one blog, equals the likes of that", () => {
-        const result = listHelper.totalLikes(listWithOneBlog);
+        const result = listHelper.totalLikes(listHelper.listWithOneBlog);
         assert.strictEqual(result, 5);
     });
 
     test("of an empty list is zero", () => {
-        const result = listHelper.totalLikes(emptyBlogs);
+        const result = listHelper.totalLikes(listHelper.emptyBlogs);
         assert.strictEqual(result, 0);
     });
 
     test("of a bigger list is calculated right", () => {
-        const result = listHelper.totalLikes(blogs);
+        const result = listHelper.totalLikes(listHelper.blogs);
         assert.strictEqual(result, 91);
     });
 });
 
-describe("blog", () => {
+describe.only("blog", () => {
+    test("list", async () => {
+        const result = await api
+            .get("/api/blogs")
+            .expect(200)
+            .expect("Content-Type", /application\/json/);
+        assert.strictEqual(result.body.length, listHelper.blogs.length);
+    });
+
     test("with most likes", () => {
         const mostLikedBlog = {
             author: "Michael Chan",
             likes: 30,
             title: "React patterns",
         };
-        const result = listHelper.favoriteBlog(blogs);
+        const result = listHelper.favoriteBlog(listHelper.blogs);
         assert.deepStrictEqual(result, mostLikedBlog);
     });
 });
 
 describe("author", () => {
     test("with most blogs", () => {
-        const result = listHelper.mostBlogs(blogs);
+        const result = listHelper.mostBlogs(listHelper.blogs);
         assert.deepStrictEqual(result, {
             author: "Robert C. Martin",
             blogs: 3,
@@ -107,10 +70,15 @@ describe("author", () => {
     });
 
     test("with most likes", () => {
-        const result = listHelper.mostLikes(blogs);
+        const result = listHelper.mostLikes(listHelper.blogs);
         assert.deepStrictEqual(result, {
             author: "Edsger W. Dijkstra",
             likes: 32,
         });
     });
+});
+
+after(async () => {
+    await mongoose.connection.close();
+    info("Database connection closed");
 });
