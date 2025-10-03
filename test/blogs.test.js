@@ -79,6 +79,24 @@ describe.only("blog", () => {
         const blogsAtEnd = await Blog.find({});
         assert.strictEqual(blogsAtEnd.length, listHelper.blogs.length + 1);
     });
+
+    test("with likes undefined default 0", async () => {
+        const newBlog = {
+            title: "Blog with no likes",
+            author: "Guido",
+            url: "http://newblog.com",
+        };
+        await api
+            .post("/api/blogs")
+            .send(newBlog)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
+        const blogsAtEnd = await Blog.find({});
+        const addedBlog = blogsAtEnd.find(
+            (blog) => blog.title === "Blog with no likes"
+        );
+        assert.strictEqual(addedBlog.likes, 0);
+    });
 });
 
 describe("author", () => {
