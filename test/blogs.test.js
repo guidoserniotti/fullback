@@ -58,6 +58,11 @@ describe.only("blog", () => {
         const result = listHelper.favoriteBlog(listHelper.blogs);
         assert.deepStrictEqual(result, mostLikedBlog);
     });
+
+    test("id field exists", async () => {
+        const result = await api.get("/api/blogs");
+        assert.ok(result.body.filter((blog) => blog.id));
+    });
 });
 
 describe("author", () => {
