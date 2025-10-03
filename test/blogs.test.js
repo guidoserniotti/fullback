@@ -63,6 +63,22 @@ describe.only("blog", () => {
         const result = await api.get("/api/blogs");
         assert.ok(result.body.filter((blog) => blog.id));
     });
+
+    test("is posted correctly", async () => {
+        const newBlog = {
+            title: "My New Blog",
+            author: "Guido",
+            url: "http://newblog.com",
+            likes: 0,
+        };
+        await api
+            .post("/api/blogs")
+            .send(newBlog)
+            .expect(201)
+            .expect("Content-Type", /application\/json/);
+        const blogsAtEnd = await Blog.find({});
+        assert.strictEqual(blogsAtEnd.length, listHelper.blogs.length + 1);
+    });
 });
 
 describe("author", () => {
