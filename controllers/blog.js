@@ -6,14 +6,15 @@ blogRouter.get("/", async (request, response) => {
     response.json(blogs);
 });
 
-blogRouter.post("/", (request, response) => {
-    if (!request.body.likes) {
-        request.body.likes = 0;
-    }
+blogRouter.post("/", async (request, response) => {
     const blog = new Blog(request.body);
-    blog.save().then((result) => {
-        response.status(201).json(result);
-    });
+    try {
+        const savedBlog = await blog.save();
+        response.status(201).json(savedBlog);
+    } catch (error) {
+        response.status(400).json({ error: error.message });
+        console.error(error);
+    }
 });
 
 module.exports = blogRouter;

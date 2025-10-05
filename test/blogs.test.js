@@ -97,6 +97,14 @@ describe.only("blog", () => {
         );
         assert.strictEqual(addedBlog.likes, 0);
     });
+
+    test("with no title nor url throw 400", async () => {
+        const newBlog = {
+            author: "Guido",
+        };
+        const response = await api.post("/api/blogs").send(newBlog).expect(400);
+        assert.ok(response.body.error);
+    });
 });
 
 describe("author", () => {
