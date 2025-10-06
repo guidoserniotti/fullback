@@ -13,7 +13,15 @@ blogRouter.post("/", async (request, response) => {
         response.status(201).json(savedBlog);
     } catch (error) {
         response.status(400).json({ error: error.message });
-        console.error(error);
+    }
+});
+
+blogRouter.delete("/:id", async (request, response, next) => {
+    try {
+        await Blog.findByIdAndDelete(request.params.id);
+        response.status(204).end();
+    } catch (error) {
+        next(error);
     }
 });
 

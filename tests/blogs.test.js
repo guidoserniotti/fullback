@@ -105,6 +105,20 @@ describe.only("blog", () => {
         const response = await api.post("/api/blogs").send(newBlog).expect(400);
         assert.ok(response.body.error);
     });
+
+    test("deleted by id", async () => {
+        const blogsAtStart = await listHelper.blogsInDb();
+        const blogToDelete = blogsAtStart[0];
+
+        await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+        const blogsAtEnd = await listHelper.blogsInDb();
+
+        assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1);
+
+        const contents = blogsAtEnd.map((r) => r.title);
+        assert(!contents.includes(blogToDelete.title));
+    });
 });
 
 describe("author", () => {
