@@ -40,7 +40,7 @@ describe("total likes", () => {
     });
 });
 
-describe.only("blog", () => {
+describe("blog", () => {
     test("list", async () => {
         const result = await api
             .get("/api/blogs")
@@ -116,8 +116,19 @@ describe.only("blog", () => {
 
         assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1);
 
-        const contents = blogsAtEnd.map((r) => r.title);
-        assert(!contents.includes(blogToDelete.title));
+        const titles = blogsAtEnd.map((r) => r.title);
+        assert(!titles.includes(blogToDelete.title));
+    });
+
+    test("updated likes by id", async () => {
+        const blogsAtStart = await listHelper.blogsInDb();
+        const blogToUpdate = blogsAtStart[0];
+        const updatedBlog = { ...blogToUpdate, likes: blogToUpdate.likes + 1 };
+        await api
+            .put(`/api/blogs/${blogToUpdate.id}`)
+            .send(updatedBlog)
+            .expect(200);
+        assert.strictEqual(blogToUpdate.likes + 1, updatedBlog.likes);
     });
 });
 

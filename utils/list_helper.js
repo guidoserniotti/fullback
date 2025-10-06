@@ -125,7 +125,6 @@ const mostLikes = (blogs) => {
 
 const blogsInDb = async () => {
     const blogs = await Blog.find({});
-    console.log(blogs.map((blog) => blog.toJSON()));
     return blogs.map((blog) => blog.toJSON());
 };
 
