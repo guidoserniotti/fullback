@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    blogs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Blog",
+        },
+    ],
 });
 // se parsea el esquema para que no guarde ciertos atributos en la BD
 userSchema.set("toJSON", {

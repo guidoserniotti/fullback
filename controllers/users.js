@@ -33,7 +33,12 @@ userRouter.post("/", async (request, response, next) => {
 
 userRouter.get("/", async (request, response, next) => {
     try {
-        const allUsers = await User.find({});
+        const allUsers = await User.find({}).populate("blogs", {
+            url: 1,
+            author: 1,
+            title: 1,
+            likes: 1,
+        });
         response.json(allUsers);
     } catch (error) {
         next(error);
