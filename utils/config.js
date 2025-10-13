@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const SECRET = process.env.SECRET;
 const PORT = process.env.PORT || 3003;
 const URL =
     process.env.NODE_ENV === "test"
@@ -8,4 +9,4 @@ const URL =
 const dbName = URL.split("/").pop().split("?")[0];
 console.log("DB running on:", dbName);
 
-module.exports = { URL, PORT };
+module.exports = { URL, PORT, SECRET };
