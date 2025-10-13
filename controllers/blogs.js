@@ -56,9 +56,15 @@ blogRouter.delete("/:id", async (request, response, next) => {
 
         if (blog.user.toString() === userFromToken.id.toString()) {
             await Blog.findByIdAndDelete(request.params.id);
+            user.blogs = user.blogs.filter(
+                (id) => id.toString() !== request.params.id
+            );
+            await user.save();
             response.status(204).end();
         } else {
-            return response.status(401).json({ error: "user not authorized to delete this blog" });
+            return response
+                .status(401)
+                .json({ error: "user not authorized to delete this blog" });
         }
     } catch (error) {
         next(error);
