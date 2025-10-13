@@ -38,15 +38,28 @@ blogRouter.post("/", async (request, response, next) => {
         await user.save();
         response.status(201).json(savedBlog);
     } catch (error) {
-        response.status(400).json({ error: error.message });
         next(error);
     }
 });
 
 blogRouter.delete("/:id", async (request, response, next) => {
     try {
-        await Blog.findByIdAndDelete(request.params.id);
-        response.status(204).end();
+        const blog = await Blog.findById(request.params.id);
+        if (!blog) {
+            return response.status(404).json({ error: "blog not found" });
+        }
+
+        const userFromToken = jwt.verify(request.token, config.SECRET);
+        if (!userFromToken.id) {
+            return response.status(401).json({ error: "token invalid" });
+        }
+
+        if (blog.user.toString() === userFromToken.id.toString()) {
+            await Blog.findByIdAndDelete(request.params.id);
+            response.status(204).end();
+        } else {
+            return response.status(401).json({ error: "user not authorized to delete this blog" });
+        }
     } catch (error) {
         next(error);
     }
@@ -62,7 +75,7 @@ blogRouter.put("/:id", async (request, response, next) => {
         await Blog.findByIdAndUpdate(request.params.id, updatedBlog, {
             new: true,
         });
-        response.status(200).json(updatedBlog).end();
+        response.status(200).json(updatedBlog);
     } catch (error) {
         next(error);
     }
