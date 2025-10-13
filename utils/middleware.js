@@ -1,4 +1,8 @@
 var morgan = require("morgan");
+const logger = require("./logger");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const config = require("./config");
 
 morgan.token("content", function getContent(req) {
     return JSON.stringify(req.body);
@@ -8,6 +12,17 @@ const tokenExtractor = (request, response, next) => {
     const authHeader = request.get("authorization");
     if (authHeader && authHeader.startsWith("Bearer ")) {
         request.token = authHeader.replace("Bearer ", "");
+    }
+    next();
+};
+
+const userExtractor = async (request, response, next) => {
+    if (request.token) {
+        const userFromToken = jwt.verify(request.token, config.SECRET);
+        if (!userFromToken.id) {
+            return response.status(401).json({ error: "token invalid" });
+        }
+        request.user = await User.findById(userFromToken.id);
     }
     next();
 };
@@ -44,6 +59,7 @@ const errorHandler = (error, request, response, next) => {
 module.exports = {
     morgan,
     tokenExtractor,
+    userExtractor,
     unknownEndpoint,
     errorHandler,
 };
