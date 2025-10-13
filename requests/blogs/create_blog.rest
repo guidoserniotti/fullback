@@ -1,5 +1,6 @@
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imd1aWRvUyIsImlkIjoiNjhlYTYxZmY2ZDc5NDY0YTBiYmQwYzZhIiwiaWF0IjoxNzYwMzYzMDE1fQ.B_zLgcJG8lUizcfwZlgW3n6AexJvOZgMN7UCmtC9osI
 
 {
   "title": "Cómo usar HTTP en tus proyectos",
