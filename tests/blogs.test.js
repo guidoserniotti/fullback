@@ -6,20 +6,47 @@ const listHelper = require("../utils/list_helper");
 const app = require("../app");
 const api = supertest(app);
 const { info, error } = require("../utils/logger");
+const bcrypt = require("bcrypt");
 
 const Blog = require("../models/blog");
+const User = require("../models/user");
+const user = require("../models/user");
+
+let token;
+let userId;
 
 beforeEach(async () => {
+    await User.deleteMany({});
     await Blog.deleteMany({});
 
+    // Crear usuario de prueba
+    const passwordHash = await bcrypt.hash("password123", 10);
+    const user = new User({
+        username: "testuser",
+        name: "Test User",
+        passwordHash,
+    });
+    const savedUser = await user.save();
+    userId = savedUser._id;
+
+    // Obtener token mediante login
+    const response = await api
+        .post("/api/login")
+        .send({ username: "testuser", password: "password123" });
+    token = response.body.token;
+
+    // Crear blogs asignados al usuario
     for (let blog of listHelper.blogs) {
-        let blogObject = new Blog(blog);
+        let blogObject = new Blog({
+            ...blog,
+            user: userId,
+        });
         await blogObject.save();
     }
 });
 
 test("dummy returns one", () => {
-    const result = listHelper.dummy(listHelper.emptyBlogs);
+    const result = listHelper.dummy(listHelper.listWithOneBlog);
     assert.strictEqual(result, 1);
 });
 
@@ -73,6 +100,7 @@ describe("blog", () => {
         };
         await api
             .post("/api/blogs")
+            .set("Authorization", `Bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect("Content-Type", /application\/json/);
@@ -88,6 +116,7 @@ describe("blog", () => {
         };
         await api
             .post("/api/blogs")
+            .set("Authorization", `Bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect("Content-Type", /application\/json/);
@@ -102,15 +131,58 @@ describe("blog", () => {
         const newBlog = {
             author: "Guido",
         };
-        const response = await api.post("/api/blogs").send(newBlog).expect(400);
+        const response = await api
+            .post("/api/blogs")
+            .set("Authorization", `Bearer ${token}`)
+            .send(newBlog)
+            .expect(400);
         assert.ok(response.body.error);
+    });
+
+    test("POST unauthorized if no token", async () => {
+        const newBlog = {
+            title: "My New Blog",
+            author: "Guido",
+            url: "http://newblog.com",
+            likes: 0,
+        };
+        const blogsAtStart = await listHelper.blogsInDb();
+        const response = await api
+            .post("/api/blogs")
+            // Sin header Authorization
+            .send(newBlog)
+            .expect(401);
+        const blogsAtEnd = await listHelper.blogsInDb();
+        assert.strictEqual(blogsAtEnd.length, blogsAtStart.length);
+        assert.strictEqual(response.body.error, "token missing");
+    });
+
+    test("POST unauthorized if token is empty", async () => {
+        const newBlog = {
+            title: "My New Blog",
+            author: "Guido",
+            url: "http://newblog.com",
+            likes: 0,
+        };
+        const blogsAtStart = await listHelper.blogsInDb();
+        const response = await api
+            .post("/api/blogs")
+            .set("Authorization", `Bearer `)
+            .send(newBlog)
+            .expect(401);
+        const blogsAtEnd = await listHelper.blogsInDb();
+        assert.strictEqual(blogsAtEnd.length, blogsAtStart.length);
+        assert.strictEqual(response.body.error, "token missing");
     });
 
     test("deleted by id", async () => {
         const blogsAtStart = await listHelper.blogsInDb();
         const blogToDelete = blogsAtStart[0];
 
-        await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .set("Authorization", `Bearer ${token}`)
+            .expect(204);
 
         const blogsAtEnd = await listHelper.blogsInDb();
 
